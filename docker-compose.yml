@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      - PORT=3001
+      - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+      - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
+      - BROWSER_START_URL=${BROWSER_START_URL:-https://www.google.com}
+      - STREAM_FPS=${STREAM_FPS:-15}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173}
+      - NODE_ENV=production
+    # Required for Playwright/Chromium inside Docker
+    shm_size: '2gb'
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - '5173:80'
+    environment:
+      - VITE_DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
+    depends_on:
+      - backend
+    restart: unless-stopped
